@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yq.cn.dao.CategoryMapper" >
+  <resultMap id="BaseResultMap" type="com.yq.cn.dao.entity.Category" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+  </resultMap>
+  
+  <resultMap type="com.yq.cn.dao.entity.Category" id="categorysResultMap">
+		<id property="id" column="pid"/>
+		<result property="name" column="pname"/>
+		<collection property="children" ofType="com.yq.cn.dao.entity.Category">
+			<id property="id" column="cid"/>
+			<result property="name" column="cname"/>
+		</collection>
+	</resultMap>
+  <sql id="Base_Column_List" >
+    id, name, parent_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tbl_category
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tbl_category
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.yq.cn.dao.entity.Category" >
+    insert into tbl_category (id, name, parent_id
+      )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.yq.cn.dao.entity.Category" >
+    insert into tbl_category
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yq.cn.dao.entity.Category" >
+    update tbl_category
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yq.cn.dao.entity.Category" >
+    update tbl_category
+    set name = #{name,jdbcType=VARCHAR},
+      parent_id = #{parentId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+   <select id="getpsById"  resultMap="categorysResultMap">
+  		<!-- 查询时必须重命名，不然会出错 -->
+  		SELECT c.id cid,c.name cname,p.id pid,p.name pname from tbl_category c,tbl_category p where c.parent_id = p.id and p.id
+		in 
+		(SELECT DISTINCT parent_id from tbl_category)
+  </select>
+</mapper>
